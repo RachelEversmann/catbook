@@ -12,7 +12,6 @@ var List = (props) => (
     <Col md={6} mdOffset={3}> {
       props.list.map( function(status, index) {
       status.ts = moment(status.create_ts).calendar();
-        console.log('text',status.text); 
         return <Status status={status} key={index}/>;
      })
     } 

@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var cookieSession = require('cookie-session');
 var bcrypt = require('bcrypt-nodejs'); // we added
 var fileUpload = require('express-fileupload');
 var app = express();
@@ -8,6 +9,13 @@ var path = require('path');
 var pg = require('pg');
 var format = require('pg-format');
 var cmd = require('node-cmd'); 
+
+app.set('trust proxy', 1);
+app.use(cookieSession({
+  name: 'session',
+  keys: ['catbook']
+}));
+
 // Parse JSON (uniform resource locators)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -42,7 +50,6 @@ app.get('/images/:id', function(req,res) {
 app.post('/upload', function(req,res) {
   var file = req.files.catPic;
   var status = req.body.status;
-  console.log('body',req,'end'); 
   var petname = req.body.petname;
   var username= 1; /************************** need to change to use sessions */
   // Use the mv() method to place the file somewhere on your server
@@ -67,6 +74,26 @@ app.post('/signup', function(req, res) {
       if (err) return res.status(500).send(err);  
       res.redirect('/');
     });
+});
+
+app.post('/login', function(req, res) {
+  // find user in system
+  // TODO not done
+  //console.log('ID of user found',user);
+    if (user !== null) {
+      bcrypt.compare(req.body.password, user.attributes.password, function(err, result) {
+        if (!result) {
+          res.redirect('/login');
+        } else {
+          req.session.username = req.body.username;
+          req.session.password = req.body.password;
+          res.redirect('/');
+        }
+      });
+    } else {
+      res.redirect('/signup');
+    }
+   //console.log('after stuff session', req.session);
 });
 
 //redirects to home if invaild path

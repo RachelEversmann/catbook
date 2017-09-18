@@ -12,8 +12,8 @@ var NavBar = (props) => (
       <NavItem href='/profile'>Your Cat Tree</NavItem>
     </Nav>
     <Nav pullRight>
-      <NavItem href="/signup"> <span className="glyphicon glyphicon-user"></span>   Sign Up</NavItem> 
-      <NavItem href="/signin"> <span className="glyphicon glyphicon-log-in"></span>   Login</NavItem> 
+      <NavItem eventKey={'signup'} onSelect={props.func} href="/signup"> <span className="glyphicon glyphicon-user"></span>   Sign Up</NavItem> 
+      <NavItem eventKey={'login'} onSelect={props.func} href="/login"> <span className="glyphicon glyphicon-log-in"></span>   Login</NavItem> 
     </Nav>
   </Navbar>
 )
