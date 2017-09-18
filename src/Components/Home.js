@@ -7,9 +7,8 @@ import $ from 'jquery';
 import {Row,Grid} from 'react-bootstrap';
 
 class Home extends Component {
-  constructor() {
-    super();
-    console.log('constructor');
+  constructor(props) {
+    super(props);
     this.state = {
       all: [],
       user: [],
@@ -18,7 +17,6 @@ class Home extends Component {
       tab: 'home'
     }
     this.refresh = this.refresh.bind(this);
-    this.clickHandler = this.clickHandler.bind(this); 
   }
 
    componentDidMount() {
@@ -40,16 +38,13 @@ class Home extends Component {
     })   
   }
 
-  clickHandler(el) {
-    this.setState({tab:el}); 
-  }
-
   render() {
+    console.log(this.props)
     return (
       <Grid className="Home">
         <h1> Welcome to Catbook </h1>
         <Row> 
-          <NavBar />
+          <NavBar func={this.props.func}/>
         </Row>
         <Row> 
           <Upload /> 

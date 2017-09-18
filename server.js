@@ -20,7 +20,8 @@ app.use(cookieSession({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, './build')));
-app.use(fileUpload()); 
+app.use(fileUpload());
+
 var config = 
   {  user: 'rachel', // name of the user account
     database: 'rachel', // name of the database
@@ -32,7 +33,7 @@ var pool = new pg.Pool(config)
 var myClient;
 pool.connect(function (err, client, done) {
   if (err) console.log(err)
-  myClient = client
+  myClient = client;
 })
 //gets data from database
 app.get('/timeline', function(req,res) {
@@ -40,67 +41,96 @@ app.get('/timeline', function(req,res) {
     myClient.query(query, function (err, result) {
       if (err) console.log(err)
       res.send(result.rows); 
-    });
-})
+    }); 
+});
+
+app.get('/logout', function(req, res) {
+  req.session = null;
+  res.redirect('/'); 
+});
 // gets photos
-app.get('/images/:id', function(req,res) {
+app.get('/images/:id', checkUser, function(req,res) {
   res.sendFile(path.join(__dirname, req.url))
 });
 // takes form data from user and puts it on the database
-app.post('/upload', function(req,res) {
+app.post('/upload', checkUser, function(req,res) {
   var file = req.files.catPic;
   var status = req.body.status;
   var petname = req.body.petname;
-  var username= 1; /************************** need to change to use sessions */
-  // Use the mv() method to place the file somewhere on your server
-  file.mv(path.join(__dirname, './images/',file.name), function(err) {
-    if (err) return res.status(500).send(err);
-    var image = './images/'+file.name;
-    cmd.run()
-    query = 'INSERT INTO status(petname, username, text, image) VALUES ($1, $2, $3, $4)'; 
-    myClient.query(query, [petname, username, status, image], function (err, result) {
-      if (err) console.log(err)
-      res.redirect('/');
-    })
-  });
+  var username= req.session.username;  
+  new Promise(function(resolve,reject) {
+    var query = 'SELECT id FROM users WHERE username = $1';
+    myClient.query(query, [username], function (err, result) {
+      if (err) reject(err);
+      resolve(result.rows[0].id);   
+    });
+  }).then ( function(id) {
+    file.mv(path.join(__dirname, './images/',file.name), function(err) {
+      if (err) return res.status(500).send(err);
+      var image = './images/'+file.name;
+      query = 'INSERT INTO status(petname, username, text, image) VALUES ($1, $2, $3, $4)'; 
+      myClient.query(query, [petname, id, status, image], function (err, result) {
+        if (err) console.log(err)
+        res.redirect('/');
+        res.end(); 
+      })
+    });
+  })
 }); 
 
 app.post('/signup', function(req, res) {
-
-    req.session.username = req.body.username;
-    req.session.password = req.body.password;
-    query = 'INSERT INTO users(username) VALUES ($1)'; 
-    myClient.query(query, [req.body.username], function (err, result) {
-      if (err) return res.status(500).send(err);  
+  //inputs username and hashed password into database, saves username to session
+  req.session.username = req.body.username;
+  new Promise( function(resolve, reject) {
+    bcrypt.hash(req.body.password, null, null,function(err,hash) {
+      if(err) reject(err); 
+      resolve(hash); 
+    })
+  }).then( (hash) => {
+    query = 'INSERT INTO users(username,password) VALUES ($1, $2)';
+    myClient.query(query, [req.body.username, hash], function (err, result) {
+      if (err) return res.status(500).send(err);
       res.redirect('/');
+      res.end(); 
     });
+  })
 });
 
 app.post('/login', function(req, res) {
-  // find user in system
-  // TODO not done
-  //console.log('ID of user found',user);
-    if (user !== null) {
-      bcrypt.compare(req.body.password, user.attributes.password, function(err, result) {
+  // find user in system then compares password with hased password 
+  query = 'SELECT * FROM users WHERE username = $1';
+  myClient.query(query, [req.body.username], function(err, result) {
+    if (result.rows.length !== 0) {
+      bcrypt.compare(req.body.password, result.rows[0].password, function(err, result) {
         if (!result) {
           res.redirect('/login');
         } else {
           req.session.username = req.body.username;
-          req.session.password = req.body.password;
           res.redirect('/');
+          res.end();
         }
       });
     } else {
-      res.redirect('/signup');
+      res.end(); 
+      //res.redirect('/signup');
     }
-   //console.log('after stuff session', req.session);
+  })  
 });
+
 
 //redirects to home if invaild path
 app.get('/*', function(req, res) {
   res.sendFile(path.join(__dirname, './build'));
-});  
+}); 
 
 app.listen(3000, function() {
     console.log('Shortly is listening on 3000');
 });
+
+function checkUser(req,res,next) {
+  if (req.session.username === null) {
+    console.alert("you shouldn't do that");
+  } else {
+    next(); 
+  }
+}

@@ -10,10 +10,10 @@ var Signup =(props) => (
       <h1> Welcome to Catbook </h1>
     </Row>
     <Row>
-      <NavBar />
+      <NavBar func={props.func}/>
     </Row>
     <Form horizontal className='Signup'
-      action='http://localhost:3000/signup' 
+      action= {props.url}
       method='post' 
       encType="multipart/form-data">
       <Row>
@@ -34,7 +34,7 @@ var Signup =(props) => (
       </Row>
       <Row>
         <Button type='submit'>
-          Join!
+          {props.text}
         </Button>
       </Row>
     </Form>
