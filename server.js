@@ -7,6 +7,7 @@ var app = express();
 var path = require('path');
 var pg = require('pg');
 var format = require('pg-format');
+var cmd = require('node-cmd'); 
 // Parse JSON (uniform resource locators)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -41,18 +42,32 @@ app.get('/images/:id', function(req,res) {
 app.post('/upload', function(req,res) {
   var file = req.files.catPic;
   var status = req.body.status;
-  var username = req.body.user; 
+  console.log('body',req,'end'); 
+  var petname = req.body.petname;
+  var username= 1; /************************** need to change to use sessions */
   // Use the mv() method to place the file somewhere on your server
   file.mv(path.join(__dirname, './images/',file.name), function(err) {
     if (err) return res.status(500).send(err);
     var image = './images/'+file.name;
-    query = 'INSERT INTO status(username, text, image) VALUES ($1, $2, $3)'; 
-    myClient.query(query, [username, status, image], function (err, result) {
+    cmd.run()
+    query = 'INSERT INTO status(petname, username, text, image) VALUES ($1, $2, $3, $4)'; 
+    myClient.query(query, [petname, username, status, image], function (err, result) {
       if (err) console.log(err)
-      res.send('File uploaded!');
+      res.redirect('/');
     })
   });
 }); 
+
+app.post('/signup', function(req, res) {
+
+    req.session.username = req.body.username;
+    req.session.password = req.body.password;
+    query = 'INSERT INTO users(username) VALUES ($1)'; 
+    myClient.query(query, [req.body.username], function (err, result) {
+      if (err) return res.status(500).send(err);  
+      res.redirect('/');
+    });
+});
 
 //redirects to home if invaild path
 app.get('/*', function(req, res) {

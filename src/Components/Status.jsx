@@ -1,11 +1,15 @@
 // Status
-import React, { Component } from 'react';
+import React from 'react';
+import './Status.css';
+import {ListGroupItem, Image} from 'react-bootstrap';
 
 var Status = (props) => (
-  <div className='status'> 
-    <div className='username'> {props.status.username} </div>
-    <div className='image'> <img src={props.status.image} alt='pic' width='50' height='50'/> </div>
+  <ListGroupItem className='status'> 
+    <div className='petname'> {props.status.petname} </div>
+    <div> <Image className='image' className='center-block' src={props.status.image} rounded responsive/> </div>
     <div className='text'> {props.status.text} </div>
-  </div>
+    <div className='time'> {props.status.ts} </div>
+  </ListGroupItem>
 )
+
 export default Status;
