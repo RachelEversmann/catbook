@@ -126,8 +126,20 @@ app.post('/login', function(req, res) {
 
 app.get('/profile', function(req, res) {
   query = 'SELECT * FROM users WHERE username = $1';
-  myClient.query(query, [req.session.username], function(err, result) {
-    res.send(result.rows[0]); 
+  new Promise(function(resolve, reject) {
+    myClient.query(query, [req.session.username], function(err, result) {
+      if(err) reject(err);
+      resolve(result.rows[0]); 
+    })
+  }).then((user) => {
+    query = 'SELECT * FROM status WHERE username = $1';
+    var id = user.id; 
+    myClient.query(query, [id], function(err, result){
+      var ret = [];
+      ret.push(user);
+      ret.push(result.rows); 
+      res.send(ret); 
+    }) 
   })
 });
 

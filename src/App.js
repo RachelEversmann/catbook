@@ -19,7 +19,7 @@ class App extends Component {
   }
 
   clickHandler() {
-    console.alert("Successfully Logged Out, have a good day");
+    console.log("Successfully Logged Out, have a good day");
     $.ajax({
       url: '/logout',
       type: 'GET',

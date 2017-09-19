@@ -4,7 +4,7 @@ import List from './List';
 import Upload from './Upload';
 import NavBar from './NavBar';
 import $ from 'jquery';
-import {Row,Grid} from 'react-bootstrap';
+import {Row, Grid, Col} from 'react-bootstrap';
 
 class Home extends Component {
   constructor(props) {
@@ -26,7 +26,6 @@ class Home extends Component {
   }
 
   refresh() {
-    console.log('in refresh');
      $.ajax({
       url: '/timeline',
       type: 'GET',
@@ -40,7 +39,6 @@ class Home extends Component {
   }
 
   render() {
-    console.log(this.props)
     return (
       <Grid className="Home">
         <h1> Welcome to Catbook </h1>
@@ -51,7 +49,9 @@ class Home extends Component {
           <Upload /> 
         </Row> 
         <Row> 
-          <List list={this.state.all} /> 
+          <Col md={6} mdOffset={3}>
+            <List list={this.state.all} />
+          </Col>
         </Row>
       </Grid>
     );
