@@ -26,6 +26,7 @@ class Home extends Component {
   }
 
   refresh() {
+    console.log('in refresh');
      $.ajax({
       url: '/timeline',
       type: 'GET',

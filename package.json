@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "babel": "^6.23.0",
+    "babel-cli": "^6.26.0",
     "bcrypt-node": "^0.1.0",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.1",
@@ -21,7 +23,7 @@
     "react-scripts": "1.0.13"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "live-server | babel . --out-dir compiled --presets=es2015,react --ignore=node_modules,compiled --source-maps inline --watch",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"

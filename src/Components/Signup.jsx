@@ -13,7 +13,7 @@ var Signup =(props) => (
       <NavBar func={props.func}/>
     </Row>
     <Form horizontal className='Signup'
-      action= {props.url}
+      action= 'http://localhost:3000/signup'
       method='post' 
       encType="multipart/form-data">
       <Row>
@@ -30,6 +30,22 @@ var Signup =(props) => (
           <ControlLabel className='formPassword'>Password</ControlLabel>
           <FormControl type='password' name='password' placeholder='password123' /> 
         </FormGroup>
+        </Col>
+      </Row>
+      <Row>
+        <Col md={4} offset={2}>
+          <FormGroup controlId='formHorizontalBio'>
+            <ControlLabel className='formBio'>Stuff about you and your cats</ControlLabel>
+            <FormControl componentClass='textarea' type='text' name='bio' placeholder='I love cats!!!!' />
+          </FormGroup>
+        </Col>
+      </Row>
+      <Row> 
+        <Col md={4} offset={2}> 
+          <FormGroup controlId='formHorizontalImage'>
+            <ControlLabel className='formImage'> Photo of you and your cats!!!! </ControlLabel>
+            <FormControl type='file' name='image'/>
+          </FormGroup>
         </Col>
       </Row>
       <Row>

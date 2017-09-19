@@ -81,27 +81,34 @@ app.post('/upload', checkUser, function(req,res) {
 app.post('/signup', function(req, res) {
   //inputs username and hashed password into database, saves username to session
   req.session.username = req.body.username;
+  var bio = req.body.bio;
+  var file = req.files.image; 
+
   new Promise( function(resolve, reject) {
     bcrypt.hash(req.body.password, null, null,function(err,hash) {
       if(err) reject(err); 
       resolve(hash); 
     })
   }).then( (hash) => {
-    query = 'INSERT INTO users(username,password) VALUES ($1, $2)';
-    myClient.query(query, [req.body.username, hash], function (err, result) {
+    file.mv(path.join(__dirname, './images/',file.name), function(err) {
       if (err) return res.status(500).send(err);
-      res.redirect('/');
-      res.end(); 
+      var image = './images/'+file.name;
+      query = 'INSERT INTO users(username, password, bio, image) VALUES ($1, $2, $3, $4)'; 
+      myClient.query(query, [req.body.username, hash, bio, image], function (err, result) {
+        if (err) console.log(err)
+        res.redirect('/');
+        res.end(); 
+      })
     });
   })
 });
 
 app.post('/login', function(req, res) {
   // find user in system then compares password with hased password 
-  query = 'SELECT * FROM users WHERE username = $1';
+  query = 'SELECT password FROM users WHERE username = $1';
   myClient.query(query, [req.body.username], function(err, result) {
     if (result.rows.length !== 0) {
-      bcrypt.compare(req.body.password, result.rows[0].password, function(err, result) {
+      bcrypt.compare(req.body.password, result.rows[0], function(err, result) {
         if (!result) {
           res.redirect('/login');
         } else {
@@ -117,6 +124,12 @@ app.post('/login', function(req, res) {
   })  
 });
 
+app.get('/profile', function(req, res) {
+  query = 'SELECT * FROM users WHERE username = $1';
+  myClient.query(query, [req.session.username], function(err, result) {
+    res.send(result.rows[0]); 
+  })
+});
 
 //redirects to home if invaild path
 app.get('/*', function(req, res) {
